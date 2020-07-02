@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.system.cart.mapper.CartMapper">
+    
+    <resultMap type="Cart" id="CartResult">
+        <result property="cartId"    column="cart_id"    />
+        <result property="productId"    column="product_id"    />
+        <result property="productName"    column="product_name"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userName"    column="user_name"    />
+        <result property="cartTime"    column="cart_time"    />
+    </resultMap>
+
+    <sql id="selectCartVo">
+        select c.cart_id, c.product_id, c.user_id, c.cart_time,u.user_name,p.product_name from sys_cart c
+        left join sys_user u on u.user_id = c.user_id
+        left join sys_product p on c.product_id = p.product_id
+    </sql>
+
+    <select id="selectCartList" parameterType="Cart" resultMap="CartResult">
+        <include refid="selectCartVo"/>
+        <where>  
+            <if test="productId != null "> and c.product_id = #{productId}</if>
+            <if test="userId != null "> and c.user_id = #{userId}</if>
+            <if test="cartTime != null "> and c.cart_time = #{cartTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectCartById" parameterType="Long" resultMap="CartResult">
+        <include refid="selectCartVo"/>
+        where cart_id = #{cartId}
+    </select>
+        
+    <insert id="insertCart" parameterType="Cart" useGeneratedKeys="true" keyProperty="cartId">
+        insert into sys_cart
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productId != null ">product_id,</if>
+            <if test="userId != null ">user_id,</if>
+            <if test="cartTime != null ">cart_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productId != null ">#{productId},</if>
+            <if test="userId != null ">#{userId},</if>
+            <if test="cartTime != null ">#{cartTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCart" parameterType="Cart">
+        update sys_cart
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="productId != null ">product_id = #{productId},</if>
+            <if test="userId != null ">user_id = #{userId},</if>
+            <if test="cartTime != null ">cart_time = #{cartTime},</if>
+        </trim>
+        where cart_id = #{cartId}
+    </update>
+
+    <delete id="deleteCartById" parameterType="Long">
+        delete from sys_cart where cart_id = #{cartId}
+    </delete>
+
+    <delete id="deleteCartByIds" parameterType="String">
+        delete from sys_cart where cart_id in 
+        <foreach item="cartId" collection="array" open="(" separator="," close=")">
+            #{cartId}
+        </foreach>
+    </delete>
+    
+</mapper>

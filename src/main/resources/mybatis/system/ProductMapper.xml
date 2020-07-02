@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.system.product.mapper.ProductMapper">
+    
+    <resultMap type="Product" id="ProductResult">
+        <result property="productId"    column="product_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userName"    column="user_name"    />
+        <result property="productName"    column="product_name"    />
+        <result property="typeId"    column="type_id"    />
+        <result property="typeName"    column="type_name"    />
+        <result property="productPicture"    column="product_picture"    />
+        <result property="productPrice"    column="product_price"    />
+        <result property="productDescription"    column="product_description"    />
+        <result property="productStatus"    column="product_status"    />
+    </resultMap>
+
+    <sql id="selectProductVo">
+        select p.product_id,p.user_id,u.user_name,p.product_name, p.type_id,t.type_name, p.product_picture, p.product_price, p.product_description, p.product_status from sys_product p
+        left join sys_type t on t.type_id = p.type_id
+        left join sys_user u on u.user_id = p.user_id
+    </sql>
+
+    <select id="selectProductList" parameterType="Product" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        <where>  
+            <if test="userId != null "> and p.user_id = #{userId}</if>
+            <if test="productName != null  and productName != ''"> and p.product_name like concat('%', #{productName}, '%')</if>
+            <if test="typeId != null "> and p.type_id = #{typeId}</if>
+            <if test="productPicture != null  and productPicture != ''"> and p.product_picture = #{productPicture}</if>
+            <if test="productPrice != null "> and p.product_price = #{productPrice}</if>
+            <if test="productDescription != null  and productDescription != ''"> and p.product_description = #{productDescription}</if>
+            <if test="productStatus != null  and productStatus != ''"> and p.product_status = #{productStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectProductById" parameterType="Long" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        where p.product_id = #{productId}
+    </select>
+    
+    
+    <select id="selectProductByTypeId" parameterType="Long" resultMap="ProductResult">
+    <include refid="selectProductVo"/>
+        where p.type_id = #{typeId}
+    </select>
+    
+        
+    <insert id="insertProduct" parameterType="Product" useGeneratedKeys="true" keyProperty="productId">
+        insert into sys_product
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null ">user_id,</if>
+            <if test="productName != null  and productName != ''">product_name,</if>
+            <if test="typeId != null ">type_id,</if>
+            <if test="productPicture != null  and productPicture != ''">product_picture,</if>
+            <if test="productPrice != null ">product_price,</if>
+            <if test="productDescription != null  and productDescription != ''">product_description,</if>
+            <if test="productStatus != null  and productStatus != ''">product_status,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null ">#{userId},</if>
+            <if test="productName != null  and productName != ''">#{productName},</if>
+            <if test="typeId != null ">#{typeId},</if>
+            <if test="productPicture != null  and productPicture != ''">#{productPicture},</if>
+            <if test="productPrice != null ">#{productPrice},</if>
+            <if test="productDescription != null  and productDescription != ''">#{productDescription},</if>
+            <if test="productStatus != null  and productStatus != ''">#{productStatus},</if>
+         </trim>
+    </insert>
+
+    <update id="updateProduct" parameterType="Product">
+        update sys_product
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null ">user_id = #{userId},</if>
+            <if test="productName != null  and productName != ''">product_name = #{productName},</if>
+            <if test="typeId != null ">type_id = #{typeId},</if>
+            <if test="productPicture != null  and productPicture != ''">product_picture = #{productPicture},</if>
+            <if test="productPrice != null ">product_price = #{productPrice},</if>
+            <if test="productDescription != null  and productDescription != ''">product_description = #{productDescription},</if>
+            <if test="productStatus != null  and productStatus != ''">product_status = #{productStatus},</if>
+        </trim>
+        where product_id = #{productId}
+    </update>
+
+    <delete id="deleteProductById" parameterType="Long">
+        delete from sys_product where product_id = #{productId}
+    </delete>
+
+    <delete id="deleteProductByIds" parameterType="String">
+        delete from sys_product where product_id in 
+        <foreach item="productId" collection="array" open="(" separator="," close=")">
+            #{productId}
+        </foreach>
+    </delete>
+    
+</mapper>

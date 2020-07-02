@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.system.order.mapper.OrderMapper">
+    
+    <resultMap type="Order" id="OrderResult">
+        <result property="orderId"    column="order_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userName"    column="user_name"    />
+        <result property="productId"    column="product_id"    />
+        <result property="productName"    column="product_name"    />
+        <result property="orderPhone"    column="order_phone"    />
+        <result property="orderAddress"    column="order_address"    />
+        <result property="orderPrice"    column="order_price"    />
+        <result property="orderTime"    column="order_time"    />
+        <result property="payWay"    column="pay_way"    />
+        <result property="orderStatus"    column="order_status"    />
+        <result property="orderComment"    column="order_comment"    />
+        <result property="orderCommentTime"    column="order_comment_time"    />
+    </resultMap>
+
+    <sql id="selectOrderVo">
+        select o.order_id, o.user_id, u.user_name,o.product_id,p.product_name, o.order_time,o.order_address,o.order_price,o.pay_way, o.order_status, o.order_comment, o.order_comment_time from sys_order o
+        left join sys_user u on u.user_id=o.user_id
+        left join sys_product p on o.product_id = p.product_id
+    </sql>
+
+    <select id="selectOrderList" parameterType="Order" resultMap="OrderResult">
+        <include refid="selectOrderVo"/>
+        <where>  
+            <if test="userId != null "> and o.user_id = #{userId}</if>
+            <if test="productId != null "> and o.product_id = #{productId}</if>
+            <if test="orderPrice != null "> and o.order_price = #{orderPrice}</if>
+            <if test="orderStatus != null  and orderStatus != ''"> and o.order_status = #{orderStatus}</if>
+            <if test="orderComment != null  and orderComment != ''"> and o.order_comment = #{orderComment}</if>
+            <if test="orderCommentTime != null "> and o.order_comment_time = #{orderCommentTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectOrderById" parameterType="Long" resultMap="OrderResult">
+        <include refid="selectOrderVo"/>
+        where o.order_id = #{orderId}
+    </select>
+    
+    
+        <select id="selectOrderBySellerId" parameterType="Long" resultMap="OrderResult">
+        <include refid="selectOrderVo"/>
+        where o.product_id in (select product_id from sys_product where user_id= #{userId})
+    </select>
+    
+        
+    <insert id="insertOrder" parameterType="Order" useGeneratedKeys="true"  keyProperty="orderId">
+        insert into sys_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null ">order_id,</if>
+            <if test="userId != null ">user_id,</if>
+            <if test="productId != null ">product_id,</if>
+            <if test="orderPrice != null ">order_price,</if>
+            <if test="orderPhone != null  and orderPhone != ''">order_phone,</if>
+            <if test="orderAddress != null  and orderAddress != ''">order_address,</if>
+            <if test="orderTime != null ">order_time,</if>
+            <if test="orderStatus != null  and orderStatus != ''">order_status,</if>
+            <if test="orderComment != null  and orderComment != ''">order_comment,</if>
+            <if test="orderCommentTime != null ">order_comment_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null ">#{orderId},</if>
+            <if test="userId != null ">#{userId},</if>
+            <if test="productId != null ">#{productId},</if>
+            <if test="orderPrice != null ">#{orderPrice},</if>
+            <if test="orderPhone != null  and orderPhone != ''">#{orderPhone},</if>
+            <if test="orderAddress != null  and orderAddress != ''">#{orderAddress},</if>
+            <if test="orderTime != null ">#{orderTime},</if>
+            <if test="orderStatus != null  and orderStatus != ''">#{orderStatus},</if>
+            <if test="orderComment != null  and orderComment != ''">#{orderComment},</if>
+            <if test="orderCommentTime != null ">#{orderCommentTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateOrder" parameterType="Order">
+        update sys_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null ">user_id = #{userId},</if>
+            <if test="productId != null ">product_id = #{productId},</if>
+            <if test="orderPrice != null ">order_price = #{orderPrice},</if>
+            <if test="orderPhone != null  and orderPhone != ''">order_phone = #{orderPhone},</if>
+            <if test="orderAddress != null  and orderAddress != ''">order_address = #{orderAddress},</if>
+            <if test="payWay != null  and payWay != ''">pay_way = #{payWay},</if>
+            <if test="orderStatus != null  and orderStatus != ''">order_status = #{orderStatus},</if>
+            <if test="orderComment != null  and orderComment != ''">order_comment = #{orderComment},</if>
+            <if test="orderCommentTime != null ">order_comment_time = #{orderCommentTime},</if>
+        </trim>
+        where order_id = #{orderId}
+    </update>
+
+    <delete id="deleteOrderById" parameterType="Long">
+        delete from sys_order where order_id = #{orderId}
+    </delete>
+
+    <delete id="deleteOrderByIds" parameterType="String">
+        delete from sys_order where order_id in 
+        <foreach item="orderId" collection="array" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </delete>
+    
+</mapper>
